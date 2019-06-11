@@ -1,8 +1,3 @@
-// [_Command-line arguments_](http://en.wikipedia.org/wiki/Command-line_interface#Arguments)
-// are a common way to parameterize execution of programs.
-// For example, `go run hello.go` uses `run` and
-// `hello.go` arguments to the `go` program.
-
 package main
 
 import (
@@ -22,24 +17,26 @@ import (
 )
 
 var size = flag.Int("size", 8, "file size in GiB")
+var file = flag.String("file", "accounts.csv", "filename and format")
 
 func main() {
 
 	// You can get individual args with normal indexing.
 	flag.Parse()
 	fSize := int64(*size)
+	fFilename := string(*file)
 
-	err := populate(fSize)
+	err := populate(fSize, fFilename)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, fSize, err)
 	}
 }
 
 
-func populate(fSize int64) error {
+func populate(fSize int64, fFilename string) error {
 
 	var wg sync.WaitGroup
-	dataChan := make(chan string,fSize)
+	accountChannel := make(chan string,fSize)
 
 	// Write to File
 	wg.Add(1)
@@ -47,12 +44,12 @@ func populate(fSize int64) error {
 	go func(size int64) {
 		for i := int64(0); i < fSize; i++ {
 			data := randomAccount()
-			dataChan <- data
+			accountChannel <- data
 		}
 		wg.Done()
 	}(fSize)
 
-	fName := `/home/deroo/code/populator/test` // test file
+	fName := `/tmp/` + fFilename // test file
 	//defer os.Remove(fName)
 	f, err := os.Create(fName)
 	if err != nil {
@@ -67,7 +64,7 @@ func populate(fSize int64) error {
 	wg.Add(1)
 	go func() {
 		for i := int64(0); i < fSize; i++ {
-			nextWrite := <-dataChan //read from oreChannel
+			nextWrite := <- accountChannel //read from oreChannel
 			nn, err := w.WriteString(nextWrite)
 			written += int64(nn)
 			if err != nil {
