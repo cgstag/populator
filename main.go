@@ -103,11 +103,16 @@ return nil
 func randomAccount() string{
 	var str strings.Builder
 	str.WriteString(uuid.New().String())
+	str.WriteString(";")
 	str.WriteString(randomdata.FirstName(2))
+	str.WriteString(";")
 	str.WriteString(randomdata.LastName())
-	str.WriteString(time.Now().Format(time.UnixDate))
+	str.WriteString(";")
+	str.WriteString(strconv.FormatInt(time.Now().Unix(),10))
+	str.WriteString(";")
 	segment:= strconv.Itoa(rand.Intn(3))
 	str.WriteString(segment)
+	str.WriteString(";")
 	segmentType := ""
 	switch segment {
 	case "0":
@@ -118,6 +123,7 @@ func randomAccount() string{
 		segmentType = "Personalité"
 	}
 	str.WriteString(segmentType)
+	str.WriteString(";")
 	integerPart := strconv.Itoa(rand.Intn(20000))
 	decimal := rand.Intn(99)
 	decimalString := ""
@@ -127,6 +133,7 @@ func randomAccount() string{
 		decimalString = strconv.Itoa(decimal)
 	}
 	str.WriteString(integerPart+"."+decimalString)
+	str.WriteString(";")
 	str.WriteString("\n")
 	return str.String()
 }
